@@ -2,7 +2,7 @@ const Utilisateur=require('../Models/Utilisateur.model')
 const bcrypt=require('bcrypt')
 const jwt=require('jsonwebtoken')
 const SendEmail = require('../Middleware/SendMail');
-
+const buy=require('../Middleware/payment')
 exports.register = async (req, res) => {
     try {
       const { nom, prenom, email, password, role } = req.body;
@@ -83,4 +83,68 @@ exports.register = async (req, res) => {
             message:"Internal server error"
         });
     }
+}
+
+exports.LoginEtudiant=async(req,res)=>{ 
+    try{
+    let {email,password}=req.body;
+    let userExists=await Utilisateur.findOne({email:email});
+    if(userExists){
+        let verifPassword=await bcrypt.compare(password,userExists.password);
+        if(verifPassword){
+            if(userExists.isVerified==false){
+                const verificationLink = `${process.env.URL_BACK}verification?email=${userExists.email}`;
+                // Construct the email request body
+                    let EmailBody = {
+                        to: userExists.email,
+                        subject: 'Please verify your email address',
+                        name: userExists.nom+"\t"+userExists.prenom,
+                        link: verificationLink,
+                        buttonText:'Verify Your Account',
+                        emailMessage:'Thank you for signing up! To complete your registration, please click the button below:'
+                    }; 
+                    
+             SendEmail({ body: EmailBody }, res); 
+                return res.status(401).json({
+                    success:false,
+                    message:'You need to verify your email first!',
+                })
+            }
+            let token =jwt.sign( { id:userExists._id } , process.env.TOKEN_SECRET, { expiresIn: '12h' });
+            res.status(200).json({
+                success:true,
+                message:'welcome back',
+                result:{
+                    token:token,
+                     id: userExists._id,
+                     avatar: userExists.avatar,
+                     nom: userExists.nom,
+                     prenom: userExists.prenom,
+                     role: userExists.role,
+                }
+            })
+            
+        }else{
+            res.status(400).json({
+                success:false,
+                message:'Email and password incorrect'
+            }) 
+        }
+
+    }else{
+        res.status(400).json({
+            success:false,
+            message:'Email and password incorrect'
+        })
+    }
+}catch(error){
+    res.status(500).json({message: "Internal server error" });
+}
+}
+
+exports.buy=async(req,res)=>{
+    let {amount}=req.body
+    console.log("buy",amount);
+    
+    buy({ body: amount }, res); 
 }
