@@ -1,4 +1,5 @@
 require('dotenv').config();
+const passport = require('passport');
 const cors = require('cors');
 const express =require('express');
 const mongoose= require('mongoose');
@@ -7,12 +8,18 @@ const port = process.env.PORT;
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 app.use(cors());
+app.use(passport.initialize());
+require('./src/Middleware/PassportStrategy');
+
+
+
 
 
 const AuthRoutes=require("./src/Routes/Auth.route")
-
+const SeanceDirectRoutes=require("./src/Routes/SeanceDirect.route")
 
 app.use("/",AuthRoutes)
+app.use("/",SeanceDirectRoutes)
 
 
 app.use('/uploads', express.static('uploads'));

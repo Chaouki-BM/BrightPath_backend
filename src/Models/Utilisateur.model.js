@@ -7,6 +7,7 @@ const utilisateurSchema = new mongoose.Schema({
   password: { type: String, required: true },
   avatar: {type:String,default:'null'},
   role: { type: String, enum: ['enseignant', 'étudiant'], required: true },
+  verificationCode:{type:String, require:true},
   isVerified:{type:Boolean,default:false}
 });
 

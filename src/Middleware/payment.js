@@ -29,7 +29,7 @@ const payment = async (req, res) => {
             "session_timeout_secs": 1200,
             "success_link": process.env.SUCCESS_URL || "http://localhost:3500/success",
             "fail_link": process.env.FAIL_URL || "http://localhost:3500/fail",
-            "developer_tracking_id": "eb701ce3-6ea0-4398-a671-ac924820b1f0"
+            "developer_tracking_id":process.env.Dev_Tracking_ID_Flouci 
         };
 
         const response = await axios.post(url, payload);

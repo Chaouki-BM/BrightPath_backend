@@ -6,7 +6,7 @@ const SendEmailMiddleware = (req, res) => {
         const { to, subject,name,link,emailMessage,buttonText} = req.body;
 
          // Check if required fields are missing
-        if (!to || !subject || !name || !link ||!emailMessage || !buttonText) {
+        if (!to || !subject || !name ||!emailMessage || !buttonText) {
             return res.status(400).json({ message: 'Missing required email fields' });
         }
 
