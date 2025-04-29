@@ -13,7 +13,7 @@ const VerifyToken = (req, res, next) => {
         if (err) {
             return res.status(401).send('Invalid token provided');
         }
-        req.user = decoded;// Save decoded token (user info) to request
+        req.userId = decoded.id;// Save decoded token (user info) to request
         next(); // Continue to the next middleware or route
     });
 };
