@@ -1,12 +1,20 @@
 const express = require('express');
-const router = express.Router();
-const supportCoursController = require('../Controllers/SupportCours.controller');
+const Router = express.Router();
 const VerifyToken=require('../Middleware/VerifToken')
-
-
+const supportCoursController = require('../Controllers/SupportCours.controller');
+const multer = require('multer');
+const upload = multer({ 
+    dest: 'uploads/',
+    limits: { fileSize: 10 * 1024 * 1024 }
+ });
 // Routes pour les enseignants (création, modification, suppression)
-router.post('/cours/:coursId', VerifyToken, supportCoursController.creerSupportCours);
-router.delete('/:supportId', VerifyToken, supportCoursController.supprimerSupportCours);
+
+Router.post('/cours/:coursId', VerifyToken,upload.single('File'), supportCoursController.creerSupportCours);
+
+Router.delete('/:supportId', VerifyToken, supportCoursController.supprimerSupportCours);
 
 // Routes pour tous les utilisateurs authentifiés
-router.get('/cours/:coursId', VerifyToken, supportCoursController.getSupportsCours);
+Router.get('/cours/:coursId', VerifyToken, supportCoursController.getSupportsCours);
+
+
+module.exports=Router;

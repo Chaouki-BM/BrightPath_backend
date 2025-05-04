@@ -1,7 +1,8 @@
-const SupportCours = require('../models/SupportCours');
-const Cours = require('../models/Cours');
-const Utilisateur = require('../models/Utilisateur');
-
+const SupportCours = require('../Models/SupportCours.model');
+const Cours = require('../Models/Cours.model');
+const Utilisateur = require('../Models/Utilisateur.model');
+const fs = require('fs').promises;
+const path = require('path');
 // Vérifier si l'utilisateur est l'enseignant du cours
 const verifierEnseignantCours = async (userId, coursId) => {
     const cours = await Cours.findById(coursId);
@@ -20,7 +21,7 @@ const verifierEnseignantCours = async (userId, coursId) => {
   exports.creerSupportCours = async (req, res) => {
     try {
       const { coursId } = req.params;
-      const { file, description } = req.body;
+      const { description } = req.body;
       
       // Vérifier que l'utilisateur est l'enseignant du cours
       const verification = await verifierEnseignantCours(req.userId, coursId);
@@ -30,7 +31,7 @@ const verifierEnseignantCours = async (userId, coursId) => {
       
       // Créer le support de cours
       const nouveauSupport = new SupportCours({
-        file,
+        file:req.file.path,
         description,
         cours: coursId
       });
@@ -50,22 +51,30 @@ exports.supprimerSupportCours = async (req, res) => {
       
       // Récupérer le support
       const support = await SupportCours.findById(supportId);
+      console.log(support.file);
       if (!support) {
         return res.status(404).json({ message: 'Support de cours non trouvé' });
       }
       
-      // Vérifier que l'utilisateur est l'enseignant du cours associé
       const verification = await verifierEnseignantCours(req.userId, support.cours);
       if (!verification.success) {
         return res.status(403).json({ message: verification.message });
       }
       
-      // Supprimer le support
-      await SupportCours.deleteOne({ _id: supportId });
-      
-      res.json({ message: 'Support de cours supprimé avec succès' });
+    
+      const filePath = path.resolve(__dirname, '..', support.file); 
+        try {
+            await fs.unlink(filePath);
+        } catch (fileError) {
+            if (fileError.code !== 'ENOENT') { 
+                throw fileError;
+            }
+            console.warn('Fichier déjà supprimé:', filePath);
+        }
+        await SupportCours.deleteOne({ _id: supportId });
+        res.json({ message: 'Support supprimé avec succès' });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500).json({message: error.message });
     }
   };
 

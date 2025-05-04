@@ -1,5 +1,5 @@
-const Cours = require('../models/Cours');
-const Utilisateur = require('../models/Utilisateur');
+const Cours = require('../Models/Cours.model');
+const Utilisateur = require('../Models/Utilisateur.model');
 
 
 // Fonctions pour les enseignants
@@ -77,7 +77,7 @@ exports.creerCours = async (req, res) => {
       res.status(500).json({ message: error.message });
     }
   };
-// Fonctions pour tous les utilisateurs (enseignants et étudiants)
+// Fonctions pour tous les utilisateurs (étudiants)
   exports.getAllCours = async (req, res) => {
     try {
       const cours = await Cours.find()

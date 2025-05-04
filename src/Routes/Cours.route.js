@@ -1,19 +1,19 @@
 const express = require('express');
-const router = express.Router();
+const Router = express.Router();
 const coursController = require('../Controllers/Cours.controller');
 const VerifyToken=require('../Middleware/VerifToken')
-const enseignantOnly = require('../middleware/enseignantOnly');
+const enseignantOnly = require('../Middleware/TeacherRoleMiddleware');
 
 
 // Routes accessibles seulement aux enseignants
-router.post('/CreerCours', VerifyToken, enseignantOnly, coursController.creerCours);
-router.put('/:id', VerifyToken, coursController.modifierCours);
-router.delete('/:id', VerifyToken, coursController.supprimerCours);
-router.get('/mes-cours', VerifyToken, enseignantOnly, coursController.getMesCours);
+Router.post('/CreerCours', VerifyToken, enseignantOnly, coursController.creerCours);
+Router.put('/:id', VerifyToken, coursController.modifierCours);
+Router.delete('/:id', VerifyToken, coursController.supprimerCours);
+Router.get('/mes-cours', VerifyToken, enseignantOnly, coursController.getMesCours);
 
 // Routes accessibles à tous les utilisateurs authentifiés
-router.get('/', VerifyToken, coursController.getAllCours);
-router.get('/:id', VerifyToken, coursController.getCoursById);
-router.get('/enseignant/:enseignantId', VerifyToken, coursController.getCoursParEnseignant);
+Router.get('/', VerifyToken, coursController.getAllCours);
+Router.get('/:id', VerifyToken, coursController.getCoursById);
+Router.get('/enseignant/:enseignantId', VerifyToken, coursController.getCoursParEnseignant);
 
-module.exports = router;
+module.exports = Router;
