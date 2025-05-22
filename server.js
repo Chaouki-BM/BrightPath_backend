@@ -20,7 +20,7 @@ const supportCoursRoutes=require("./src/Routes/SupportCours.route")
 
 app.use("/",AuthRoutes)
 app.use("/",SeanceDirectRoutes)
-app.use('/api/cours', coursRoutes);
+app.use('/', coursRoutes);
 app.use('/api/supports', supportCoursRoutes);
 app.use('/uploads', express.static('uploads'));
 

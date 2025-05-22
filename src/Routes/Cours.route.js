@@ -13,7 +13,8 @@ Router.get('/mes-cours', VerifyToken, enseignantOnly, coursController.getMesCour
 
 // Routes accessibles à tous les utilisateurs authentifiés
 Router.get('/', VerifyToken, coursController.getAllCours);
-Router.get('/:id', VerifyToken, coursController.getCoursById);
 Router.get('/enseignant/:enseignantId', VerifyToken, coursController.getCoursParEnseignant);
+Router.get('/getStudentSubscriptions', VerifyToken, coursController.getStudentSubscriptions);
+Router.get('/:id', VerifyToken, coursController.getCoursById);
 
 module.exports = Router;

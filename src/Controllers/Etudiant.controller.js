@@ -1,4 +1,6 @@
 const Utilisateur=require('../Models/Utilisateur.model')
+const Abonnement=require("../Models/Abonnement.model")
+const Cours=require("../Models/Cours.model")
 const bcrypt=require('bcrypt')
 const jwt=require('jsonwebtoken')
 const SendEmail = require('../Middleware/SendMail');
@@ -6,7 +8,7 @@ const buy=require('../Middleware/payment')
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const generator = require('generate-password');
-
+const axios = require("axios");
 const generatePassword=()=>{
     return password = generator.generate({
         length: 6,
@@ -164,6 +166,96 @@ exports.buy=async(req,res)=>{
     
     buy({ body: amount }, res); 
 }
+
+exports.VerifyPayment = async (req, res) => {
+    try {
+        const { coursId } = req.body;
+        const paymentId = req.params.id;
+        
+        
+        if (!coursId) {
+            return res.status(400).json({ 
+                success: false,
+                message: "Course ID is required" 
+            });
+        }
+        
+        if (!paymentId) {
+            return res.status(400).json({ 
+                success: false,
+                message: "Payment ID is required" 
+            });
+        }
+        
+        const verifyUrl = `https://developers.flouci.com/api/verify_payment/${paymentId}`;
+        
+        
+        const response = await axios.get(verifyUrl, {
+            headers: {
+                'Content-Type': 'application/json',
+                'apppublic': process.env.App_Token_Flouci,
+                'appsecret': process.env.App_Secret_Flouci
+            }
+        });
+        
+        
+        if (response.data.result.status === "FAILURE") {
+            return res.status(400).json({
+                success: false,
+                message: "Payment failed"
+            });
+        }
+        
+        
+        const cours = await Cours.findById(coursId);
+        if (!cours) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found"
+            });
+        }
+        
+        
+        const existingSubscription = await Abonnement.findOne({
+            etudiant: req.userId,
+            cours: coursId
+        });
+        
+        if (existingSubscription) {
+            return res.status(400).json({
+                success: false,
+                message: "You already have a subscription for this course"
+            });
+        }
+        
+        
+        const abonnement = await Abonnement.create({
+            etudiant: req.userId,
+            cours: coursId,
+            etat: "paye",
+            date_payement: new Date(),
+            montant: cours.prix
+        });
+        
+        res.status(200).json({
+            success: true,
+            message: "Payment verified and subscription created successfully",
+            data: {
+                subscriptionId: abonnement._id,
+                courseTitle: cours.titre,
+                amount: cours.prix
+            }
+        });
+        
+    } catch (err) {
+        console.error('Payment verification error:', err.message);
+        res.status(500).json({ 
+            success: false,
+            message: "Internal server error" 
+        });
+    }
+}
+
 exports.SendEmailFrogetPassword=async(req,res)=>{
     try{
     let { email }=req.body

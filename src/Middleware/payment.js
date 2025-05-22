@@ -31,14 +31,14 @@ const payment = async (req, res) => {
             "fail_link": process.env.FAIL_URL || "http://localhost:3500/fail",
             "developer_tracking_id":process.env.Dev_Tracking_ID_Flouci 
         };
-
+        
         const response = await axios.post(url, payload);
         
         res.status(200).json({
             success: true,
             data: response.data
         });
-
+        
     } catch (error) {
         console.error("Payment error:", error);
         
