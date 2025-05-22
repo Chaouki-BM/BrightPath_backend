@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const abonnementSchema = new mongoose.Schema({
-  etudiant: { type: mongoose.Schema.Types.ObjectId, ref: 'Etudiant' },
+  etudiant: { type: mongoose.Schema.Types.ObjectId, ref: 'Utilisateur' },
   cours: { type: mongoose.Schema.Types.ObjectId, ref: 'Cours' },
   etat: String,
   date_payement: Date,

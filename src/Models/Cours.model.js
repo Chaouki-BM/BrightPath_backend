@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
-
 const coursSchema = new mongoose.Schema({
   titre: String,
   niveau_etude: String,
   prix: Number,
-  enseignant: { type: mongoose.Schema.Types.ObjectId, ref: 'Enseignant' }
+  rating:{type:Number,default:0},
+  enseignant: { type: mongoose.Schema.Types.ObjectId, ref: 'Utilisateur' }
 },{
     timestamps:true
 });

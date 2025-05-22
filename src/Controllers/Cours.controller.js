@@ -1,7 +1,5 @@
 const Cours = require('../Models/Cours.model');
 const Utilisateur = require('../Models/Utilisateur.model');
-
-
 // Fonctions pour les enseignants
 exports.creerCours = async (req, res) => {
     try {
@@ -10,14 +8,12 @@ exports.creerCours = async (req, res) => {
       if (!utilisateur || utilisateur.role !== 'enseignant') {
         return res.status(403).json({ message: 'Accès refusé. Seuls les enseignants peuvent créer des cours.' });
       }
-  
       const nouveauCours = new Cours({
         titre: req.body.titre,
         niveau_etude: req.body.niveau_etude,
         prix: req.body.prix,
         enseignant: req.userId,
       });
-  
       const coursSauvegarde = await nouveauCours.save();
       res.status(201).json(coursSauvegarde);
     } catch (error) {
@@ -68,20 +64,22 @@ exports.creerCours = async (req, res) => {
     }
   };
 
-  exports.getMesCours = async (req, res) => {
-    try {
-      const cours = await Cours.find({ enseignant: req.userId })
-        .sort({ dateCreation: -1 });
-      res.json(cours);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  };
+exports.getMesCours = async (req, res) => {
+  try {
+    const cours = await Cours.find({ enseignant: req.userId })
+      .populate('enseignant', 'nom avatar') // << inclure nom et avatar
+      .sort({ dateCreation: -1 });
+
+    res.json(cours);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 // Fonctions pour tous les utilisateurs (étudiants)
   exports.getAllCours = async (req, res) => {
     try {
       const cours = await Cours.find()
-        .populate('enseignant', 'nom prenom')
+        .populate('enseignant', 'nom avatar')
         .sort({ dateCreation: -1 });
       res.json(cours);
     } catch (error) {
@@ -114,4 +112,3 @@ exports.getCoursParEnseignant = async (req, res) => {
       res.status(500).json({ message: error.message });
     }
   };
-

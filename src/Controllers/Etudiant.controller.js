@@ -73,8 +73,7 @@ exports.register = async (req, res) => {
   
   exports.Verif_Mail=async(req,res)=>{
     try{
-        const { email,Vcode } = req.query;
-        
+        const { email,Vcode } = req.body;
         const userExists=await Utilisateur.findOne({email})
         if(userExists.verificationCode==Vcode){
             userExists.isVerified=true; 
@@ -223,3 +222,78 @@ exports.UpdateForgetPassword=async (req,res) => {
         res.status(500).json({message: "Internal server error" });
     }
 }
+exports.modifierIdentiteProfil = async (req, res) => {
+    try {
+      const { nom, prenom, email, date_nais } = req.body;
+      const utilisateur = await Utilisateur.findById(req.userId);
+      if (!utilisateur) {
+        return res.status(404).json({ message: "Utilisateur non trouvé" });
+      }
+      utilisateur.nom = nom || utilisateur.nom;
+      utilisateur.prenom = prenom || utilisateur.prenom;
+      utilisateur.email = email || utilisateur.email;
+      utilisateur.date_nais = date_nais || utilisateur.date_nais;
+      const utilisateurMisAJour = await utilisateur.save();
+      res.status(200).json(utilisateurMisAJour);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+
+exports.modifierAvatarProfil = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "Aucun fichier envoyé" });
+    }
+
+    const utilisateur = await Utilisateur.findById(req.userId);
+    if (!utilisateur) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    utilisateur.avatar = req.file.path;
+
+    const utilisateurMisAJour = await utilisateur.save();
+
+    res.status(200).json(utilisateurMisAJour);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+exports.modifierMotDePasse = async (req, res) => {
+    try {
+      const { ancienMotDePasse, nouveauMotDePasse } = req.body;
+  
+      const utilisateur = await Utilisateur.findById(req.userId);
+      if (!utilisateur) {
+        return res.status(404).json({ message: "Utilisateur non trouvé" });
+      }
+  
+      // Vérifier l'ancien mot de passe
+      const motDePasseValide = await bcrypt.compare(ancienMotDePasse, utilisateur.password);
+      if (!motDePasseValide) {
+        return res.status(401).json({ message: "Ancien mot de passe incorrect" });
+      }
+  
+      // Hacher et enregistrer le nouveau mot de passe
+      const salt = await bcrypt.genSalt(10);
+      utilisateur.password = await bcrypt.hash(nouveauMotDePasse, salt);
+      await utilisateur.save();
+  
+      res.status(200).json({ message: "Mot de passe mis à jour avec succès" });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+  exports.getuser = async (req, res) => {
+    try {
+      const utilisateur = await Utilisateur.findById(req.userId).select('email nom prenom date_nais avatar');
+      if (!utilisateur) {
+        return res.status(404).json({ message: "Utilisateur non trouvé" });
+      }
+  
+      res.status(200).json(utilisateur);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
