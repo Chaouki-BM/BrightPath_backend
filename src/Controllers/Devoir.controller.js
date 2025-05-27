@@ -13,7 +13,7 @@ const estEnseignantDuCours = async (enseignantId, coursId) => {
 
   exports.creerDevoir = async (req, res) => {
     try {
-      const { coursId, date_fin } = req.body;
+      const { coursId, date_fin,title } = req.body;
       const enseignantId = req.userId; 
         
       const utilisateur = await Utilisateur.findById(enseignantId);
@@ -31,16 +31,16 @@ const estEnseignantDuCours = async (enseignantId, coursId) => {
         });
       }
   
+      if (!title || !date_fin || !coursId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title, date_fin, and cours are required'
+      });
+    }
       
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          message: "Veuillez télécharger un fichier pour le devoir"
-        });
-      }
   
       const nouveauDevoir = new Devoir({
-        file: req.file.path, 
+        title:title,
         date_fin: new Date(date_fin),
         cours: coursId
       });
@@ -61,7 +61,61 @@ const estEnseignantDuCours = async (enseignantId, coursId) => {
       });
     }
   };
+exports.supprimerDevoir = async (req, res) => {
+  try {
+    const { idDevoir } = req.params;
+   const enseignantId = req.userId;
 
+       // Vérifier que l'utilisateur est un enseignant
+    const utilisateur = await Utilisateur.findById(enseignantId);
+    if (!utilisateur || utilisateur.role !== 'enseignant') {
+      return res.status(403).json({
+        success: false,
+        message: "Seuls les enseignants peuvent modifier des devoirs"
+      });
+    }
+      
+      const devoir = await Devoir.findById(idDevoir);
+      
+      if (!devoir) {
+        return res.status(404).json({
+          success: false,
+          message: "Devoir non trouvé"
+        });
+      }
+      
+      
+      if (!await estEnseignantDuCours(enseignantId, devoir.cours)) {
+        return res.status(403).json({
+          success: false,
+          message: "Vous n'êtes pas autorisé à modifier ce devoir"
+        });
+      }
+    const deletedDevoir = await Devoir.findByIdAndDelete(idDevoir);
+
+    if (!deletedDevoir) {
+      return res.status(404).json({
+        success: false,
+        message: 'Devoir not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Devoir deleted successfully',
+      data: deletedDevoir
+    });
+
+  } catch (error) {
+    console.error('Error deleting devoir:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+//lenna ta3tih l id mt3 l cours w ijiblk devoirat lkoll mt3 l cours haka 
   exports.obtenirDevoirsParCours = async (req, res) => {
     try {
       const { coursId } = req.params;
@@ -86,7 +140,7 @@ const estEnseignantDuCours = async (enseignantId, coursId) => {
 
   exports.mettreAJourDevoir = async (req, res) => {
     try {
-      const { date_fin } = req.body;
+      const { date_fin,title,idDevoir } = req.body;
       const enseignantId = req.userId;
 
        // Vérifier que l'utilisateur est un enseignant
@@ -98,7 +152,7 @@ const estEnseignantDuCours = async (enseignantId, coursId) => {
       });
     }
       
-      const devoir = await Devoir.findById(req.params.id);
+      const devoir = await Devoir.findById(idDevoir);
       
       if (!devoir) {
         return res.status(404).json({
@@ -116,92 +170,46 @@ const estEnseignantDuCours = async (enseignantId, coursId) => {
       }
   
       
-      if (date_fin) devoir.date_fin = new Date(date_fin);
-      
-      if (req.file) {
-        const cheminFichier = path.join(__dirname, '../uploads', devoir.file);
-        if (fs.existsSync(cheminFichier)) {
-          fs.unlinkSync(cheminFichier);
-        }
-        
-        
-        devoir.file = req.file.path;
-      }
-  
-      await devoir.save();
-  
-      res.status(200).json({
-        success: true,
-        data: devoir,
-        message: "Devoir mis à jour avec succès"
-      });
-    } catch (erreur) {
-      res.status(500).json({
+    const updateData = {};
+    if (title) updateData.title = title;
+    if (date_fin) updateData.date_fin = new Date(date_fin);
+
+    
+    const updatedDevoir = await Devoir.findByIdAndUpdate(
+      idDevoir,
+      updateData,
+      { new: true }
+    );
+
+    if (!updatedDevoir) {
+      return res.status(404).json({
         success: false,
-        message: "Erreur lors de la mise à jour du devoir",
-        error: erreur.message
+        message: 'Devoir not found'
       });
     }
+
+    res.status(200).json({
+      success: true,
+      message: 'Devoir updated successfully',
+      data: updatedDevoir
+    });
+
+  } catch (error) {
+    console.error('Error updating devoir:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
   };
 
-  exports.supprimerDevoir = async (req, res) => {
-    try {
-      const enseignantId = req.userId;
-      
-      // Vérifier que l'utilisateur est un enseignant
-    const utilisateur = await Utilisateur.findById(enseignantId);
-    if (!utilisateur || utilisateur.role !== 'enseignant') {
-      return res.status(403).json({
-        success: false,
-        message: "Seuls les enseignants peuvent supprimer des devoirs"
-      });
-    }
-
-      const devoir = await Devoir.findById(req.params.id);
-      
-      if (!devoir) {
-        return res.status(404).json({
-          success: false,
-          message: "Devoir non trouvé"
-        });
-      }
-      
-      
-      if (!await estEnseignantDuCours(enseignantId, devoir.cours)) {
-        return res.status(403).json({
-          success: false,
-          message: "Vous n'êtes pas autorisé à supprimer ce devoir"
-        });
-      }
   
-      
-      const cheminFichier = path.join(__dirname, '../uploads', devoir.file);
-      if (fs.existsSync(cheminFichier)) {
-        fs.unlinkSync(cheminFichier);
-      }
-  
-      await Devoir.findByIdAndDelete(req.params.id);
-  
-      await CompteRendu.deleteMany({ devoir: req.params.id });
-  
-      res.status(200).json({
-        success: true,
-        message: "Devoir et tous les comptes rendus associés supprimés avec succès"
-      });
-    } catch (erreur) {
-      res.status(500).json({
-        success: false,
-        message: "Erreur lors de la suppression du devoir",
-        error: erreur.message
-      });
-    }
-  };
-
   // lel étudiants bch yraj3  compte rendu mizalt faha mochkla ta nrk7ha 
 exports.soumettreCompteRendu = async (req, res) => {
     try {
       const { devoirId } = req.params;
-      const etudiantId = req.user.id; 
+      const etudiantId =  req.userId; 
        
     const utilisateur = await Utilisateur.findById(etudiantId);
     if (!utilisateur || utilisateur.role !== 'étudiant') {
@@ -292,54 +300,69 @@ exports.soumettreCompteRendu = async (req, res) => {
     }
   };
 
-// Pour les enseignants pour obtenir toutes les soumissions pour un devoir
-exports.obtenirComptesRendusParDevoir = async (req, res) => {
+
+exports.GetAllDevoir = async (req, res) => {
     try {
-      const { devoirId } = req.params;
-      const enseignantId = req.user.id;
-      
-      // Vérifier que l'utilisateur est un enseignant
-      const utilisateur = await Utilisateur.findById(enseignantId);
-      if (!utilisateur || utilisateur.role !== 'enseignant') {
-        return res.status(403).json({
-          success: false,
-          message: "Seuls les enseignants peuvent consulter les comptes rendus"
-        });
-      }
-      
-      // Trouver le devoir
-      const devoir = await Devoir.findById(devoirId).populate('cours');
-      
-      if (!devoir) {
-        return res.status(404).json({
-          success: false,
-          message: "Devoir non trouvé"
-        });
-      }
-      
-      // Vérifier si l'enseignant est propriétaire du cours auquel le devoir est assigné
-      if (devoir.cours.enseignant.toString() !== enseignantId.toString()) {
-        return res.status(403).json({
-          success: false,
-          message: "Vous n'êtes pas autorisé à voir ces comptes rendus"
-        });
-      }
-      
-      // Obtenir toutes les soumissions
-      const comptesRendus = await CompteRendu.find({ devoir: devoirId })
-        .populate('etudiant', 'nom prenom email')
-        .sort({ dateSubmission: -1 });
-      
-      res.status(200).json({
-        success: true,
-        count: comptesRendus.length,
-        data: comptesRendus
-      });
-    } catch (erreur) {
-      res.status(500).json({
+    const { CoursId } = req.body;
+    const enseignantId =  req.userId;
+
+    // Vérifier que l'utilisateur est un enseignant
+    const utilisateur = await Utilisateur.findById(enseignantId);
+    if (!utilisateur || utilisateur.role !== 'enseignant') {
+      return res.status(403).json({
         success: false,
-        message: "Erreur lors de la récupération des comptes rendus",
-        error: erreur.message
+        message: "Seuls les enseignants peuvent consulter les comptes rendus"
       });
     }
+
+    
+    const cours = await Cours.findById(CoursId);
+    
+    
+    if (!cours) {
+      return res.status(404).json({
+        success: false,
+        message: "Cours non trouvé"
+      });
+    }
+
+    if (cours.enseignant.toString() !== enseignantId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Vous n'êtes pas autorisé à accéder à ce cours"
+      });
+    }
+
+    
+    const devoirs = await Devoir.find({ cours: CoursId }).lean();
+
+   
+    const devoirsAvecComptesRendus = await Promise.all(
+      devoirs.map(async (devoir) => {
+        const comptesRendus = await CompteRendu.find({ devoir: devoir._id })
+          .populate('etudiant', 'nom prenom')
+          .sort({ createdAt: -1 }) 
+          .lean();
+
+        return {
+          ...devoir,
+          comptesRendus
+        };
+      })
+    );
+
+    return res.status(200).json({
+      success: true,
+      count: devoirsAvecComptesRendus.length,
+      data: devoirsAvecComptesRendus
+    });
+
+  } catch (erreur) {
+    console.error('Erreur:', erreur);
+    return res.status(500).json({
+      success: false,
+      message: "Erreur lors de la récupération des comptes rendus",
+      error: erreur.message
+    });
+  }
   };

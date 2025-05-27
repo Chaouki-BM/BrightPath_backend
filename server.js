@@ -17,11 +17,12 @@ const AuthRoutes=require("./src/Routes/Auth.route")
 const SeanceDirectRoutes=require("./src/Routes/SeanceDirect.route")
 const coursRoutes=require("./src/Routes/Cours.route")
 const supportCoursRoutes=require("./src/Routes/SupportCours.route")
-
+const DevoirRoute=require("./src/Routes/Devoir.route")
 app.use("/",AuthRoutes)
 app.use("/",SeanceDirectRoutes)
 app.use('/', coursRoutes);
 app.use('/', supportCoursRoutes);
+app.use('/',DevoirRoute)
 app.use('/uploads', express.static('uploads'));
 
 mongoose.connect(process.env.MONGO_URI).then(()=>{
