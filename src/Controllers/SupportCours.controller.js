@@ -21,7 +21,7 @@ const verifierEnseignantCours = async (userId, coursId) => {
   exports.creerSupportCours = async (req, res) => {
     try {
       const { coursId } = req.params;
-      const { description } = req.body;
+      const { description, titre, date_de_publication } = req.body;
       
       // Vérifier que l'utilisateur est l'enseignant du cours
       const verification = await verifierEnseignantCours(req.userId, coursId);
@@ -33,6 +33,8 @@ const verifierEnseignantCours = async (userId, coursId) => {
       const nouveauSupport = new SupportCours({
         file:req.file.path,
         description,
+        titre,
+        date_de_publication,
         cours: coursId
       });
       
@@ -82,19 +84,79 @@ exports.supprimerSupportCours = async (req, res) => {
   exports.getSupportsCours = async (req, res) => {
     try {
       const { coursId } = req.params;
+  
+      // Vérifier que le cours existe + récupérer enseignant
+      const cours = await Cours.findById(coursId)
+        .populate('enseignant', 'nom avatar');
       
-      // Vérifier que le cours existe
-      const cours = await Cours.findById(coursId);
       if (!cours) {
         return res.status(404).json({ message: 'Cours non trouvé' });
       }
-      
-      // Récupérer tous les supports associés à ce cours
+  
+      // Récupérer tous les supports associés au cours
       const supports = await SupportCours.find({ cours: coursId }).sort({ createdAt: -1 });
-      
-      res.json(supports);
+  
+      // Construire la réponse finale
+      res.json({
+        cours: {
+          _id: cours._id,
+          titre: cours.titre,
+          niveau_etude: cours.niveau_etude,
+          enseignant: cours.enseignant // contient nom et avatar
+        },
+        supports
+      });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   };
-   
+  
+exports.modifierSupportCours = async (req, res) => {
+  try {
+    const { supportId } = req.params;
+    const { description, titre, date_de_publication } = req.body;
+
+    // Récupérer le support
+    const support = await SupportCours.findById(supportId);
+    if (!support) {
+      return res.status(404).json({ message: 'Support de cours non trouvé' });
+    }
+
+    // Vérifier que l'utilisateur est l'enseignant du cours
+    const verification = await verifierEnseignantCours(req.userId, support.cours);
+    if (!verification.success) {
+      return res.status(403).json({ message: verification.message });
+    }
+
+    // Mettre à jour les champs
+    const updates = {};
+    if (description) updates.description = description;
+    if (titre) updates.titre = titre;
+    if (date_de_publication) updates.date_de_publication = date_de_publication;
+
+    // Si un nouveau fichier est fourni
+    if (req.file) {
+      // Supprimer l'ancien fichier
+      const oldFilePath = path.resolve(__dirname, '..', support.file);
+      try {
+        await fs.unlink(oldFilePath);
+      } catch (fileError) {
+        if (fileError.code !== 'ENOENT') {
+          console.warn('Erreur lors de la suppression de l\'ancien fichier:', fileError);
+        }
+      }
+      updates.file = req.file.path;
+    }
+
+    // Mettre à jour le support
+    const supportModifie = await SupportCours.findByIdAndUpdate(
+      supportId,
+      updates,
+      { new: true }
+    );
+
+    res.json(supportModifie);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

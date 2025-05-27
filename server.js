@@ -21,7 +21,7 @@ const supportCoursRoutes=require("./src/Routes/SupportCours.route")
 app.use("/",AuthRoutes)
 app.use("/",SeanceDirectRoutes)
 app.use('/', coursRoutes);
-app.use('/api/supports', supportCoursRoutes);
+app.use('/', supportCoursRoutes);
 app.use('/uploads', express.static('uploads'));
 
 mongoose.connect(process.env.MONGO_URI).then(()=>{

@@ -8,13 +8,9 @@ const upload = multer({
     limits: { fileSize: 10 * 1024 * 1024 }
  });
 // Routes pour les enseignants (création, modification, suppression)
-
 Router.post('/cours/:coursId', VerifyToken,upload.single('File'), supportCoursController.creerSupportCours);
-
-Router.delete('/:supportId', VerifyToken, supportCoursController.supprimerSupportCours);
-
-// Routes pour tous les utilisateurs authentifiés
+Router.put('/cours/:supportId', VerifyToken, upload.single('File'), supportCoursController.modifierSupportCours);
+Router.delete('/cours/:supportId', VerifyToken, supportCoursController.supprimerSupportCours);
 Router.get('/cours/:coursId', VerifyToken, supportCoursController.getSupportsCours);
-
 
 module.exports=Router;
