@@ -31,7 +31,7 @@ const verifierEnseignantCours = async (userId, coursId) => {
       
       // Créer le support de cours
       const nouveauSupport = new SupportCours({
-        file:req.file.path,
+        file:req.file.path.replace(/\\/g, "/"),
         description,
         titre,
         date_de_publication,
