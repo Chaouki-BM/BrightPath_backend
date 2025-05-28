@@ -5,5 +5,5 @@ const VerifyToken=require('../Middleware/VerifToken')
 Router.post("/creerDevoir",VerifyToken,Devoire.creerDevoir);
 Router.post("/mettreAJourDevoir",VerifyToken,Devoire.mettreAJourDevoir);
 Router.delete("/supprimerDevoir/:idDevoir",VerifyToken,Devoire.supprimerDevoir);
-Router.post("/GetAllDevoir",VerifyToken,Devoire.GetAllDevoir);
+Router.get("/GetAllDevoir/:CoursId",VerifyToken,Devoire.GetAllDevoir);
 module.exports=Router;

@@ -12,7 +12,7 @@ Router.delete('/:id', VerifyToken, coursController.supprimerCours);
 Router.get('/mes-cours', VerifyToken, enseignantOnly, coursController.getMesCours);
 
 // Routes accessibles à tous les utilisateurs authentifiés
-Router.get('/', VerifyToken, coursController.getAllCours);
+Router.get('/all', VerifyToken, coursController.getAllCours);
 Router.get('/enseignant/:enseignantId', VerifyToken, coursController.getCoursParEnseignant);
 Router.get('/getStudentSubscriptions', VerifyToken, coursController.getStudentSubscriptions);
 Router.get('/:id', VerifyToken, coursController.getCoursById);

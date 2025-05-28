@@ -169,9 +169,9 @@ exports.buy=async(req,res)=>{
 
 exports.VerifyPayment = async (req, res) => {
     try {
-        const { coursId } = req.body;
+       
         const paymentId = req.params.id;
-        
+        const coursId = req.params.coursId;
         
         if (!coursId) {
             return res.status(400).json({ 

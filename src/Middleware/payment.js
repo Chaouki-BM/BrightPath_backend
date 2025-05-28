@@ -27,7 +27,7 @@ const payment = async (req, res) => {
             "amount": req.body,
             "accept_card": "true",
             "session_timeout_secs": 1200,
-            "success_link": process.env.SUCCESS_URL || "http://localhost:3500/success",
+            "success_link": process.env.SUCCESS_URL || "http://localhost:5173/payementSuccess",
             "fail_link": process.env.FAIL_URL || "http://localhost:3500/fail",
             "developer_tracking_id":process.env.Dev_Tracking_ID_Flouci 
         };

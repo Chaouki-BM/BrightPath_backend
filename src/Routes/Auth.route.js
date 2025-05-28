@@ -18,7 +18,7 @@ Router.get('/auth/google/callback',
   
 );
 Router.post("/buy",EtudiantController.buy);
-Router.post("/VrifyPayment/:id",VerifyToken,EtudiantController.VerifyPayment);
+Router.post("/VrifyPayment/:id/:coursId",VerifyToken,EtudiantController.VerifyPayment);
 Router.put("/updateProfile",VerifyToken,EtudiantController.modifierIdentiteProfil)
 Router.put('/updateAvatar', VerifyToken, upload.single('avatar'), EtudiantController.modifierAvatarProfil);
 Router.put('/updateMotdepasse', VerifyToken, EtudiantController.modifierMotDePasse);

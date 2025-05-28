@@ -303,7 +303,7 @@ exports.soumettreCompteRendu = async (req, res) => {
 
 exports.GetAllDevoir = async (req, res) => {
     try {
-    const { CoursId } = req.body;
+    const { CoursId } = req.params;
     const enseignantId =  req.userId;
 
     // Vérifier que l'utilisateur est un enseignant
