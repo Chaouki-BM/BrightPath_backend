@@ -119,19 +119,38 @@ exports.supprimerDevoir = async (req, res) => {
     exports.obtenirDevoirsParCours = async (req, res) => {
   try {
     const { coursId } = req.params;
-    
-    const devoirs = await Devoir.find({ cours: coursId })
-      .sort({ date_fin: 1 });
+    const etudiantId=req.userId;
+    // Verify student exists
+    const etudiant = await Utilisateur.findById(etudiantId);
+    if (!etudiant || etudiant.role !== 'étudiant') {
+      return res.status(403).json({
+        success: false,
+        message: 'User is not an étudiant'
+      });
+    }
+
+    const devoirs = await Devoir.find({ cours: coursId });
+    const devoirIds = devoirs.map(devoir => devoir._id);
+
+    const compteRendus = await CompteRendu.find({
+      devoir: { $in: devoirIds },
+      etudiant: etudiantId
+    })
+    .populate({
+      path: 'devoir',
+      select: 'title date_fin',
+    })
+    .sort({ date_fin: 1 });
 
     res.status(200).json({
       success: true,
-      count: devoirs.length,
-      data: devoirs
+      data: compteRendus
     });
+
   } catch (erreur) {
     res.status(500).json({
       success: false,
-      message: "Erreur lors de la récupération des devoirs du cours",
+      message: "Erreur lors de la récupération des comptes rendus",
       error: erreur.message
     });
   }
