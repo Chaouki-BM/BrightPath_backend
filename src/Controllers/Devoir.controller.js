@@ -116,7 +116,6 @@ exports.supprimerDevoir = async (req, res) => {
   }
 };
 //lenna ta3tih l id mt3 l cours w ijiblk devoirat lkoll mt3 l cours haka 
-  exports.obtenirDevoirsParCours = async (req, res) => {
     exports.obtenirDevoirsParCours = async (req, res) => {
   try {
     const { coursId } = req.params;
@@ -137,7 +136,7 @@ exports.supprimerDevoir = async (req, res) => {
     });
   }
 };
-  };
+
   
 
 
