@@ -139,20 +139,11 @@ exports.supprimerDevoir = async (req, res) => {
     .populate({
       path: 'devoir',
       select: 'title date_fin',
-      populate: {
-        path: 'cours',
-        select: 'titre niveau_etude'
-      }
     })
     .sort({ dateSubmission: -1 });
 
     res.status(200).json({
       success: true,
-      count: compteRendus.length,
-      etudiant: {
-        nom: etudiant.nom,
-        prenom: etudiant.prenom
-      },
       data: compteRendus
     });
 
