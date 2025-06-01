@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
 const seanceDirectSchema = new mongoose.Schema({
-  date: Date,
+  titre: String,
+  date: String,
   heure: String,
   cours: { type: mongoose.Schema.Types.ObjectId, ref: 'Cours' }
 },{
