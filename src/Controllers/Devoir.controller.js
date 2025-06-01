@@ -116,7 +116,7 @@ exports.supprimerDevoir = async (req, res) => {
   }
 };
 //lenna ta3tih l id mt3 l cours w ijiblk devoirat lkoll mt3 l cours haka 
-    exports.obtenirDevoirsParCours = async (req, res) => {
+  exports.obtenirDevoirsParCours = async (req, res) => {
   try {
     const { coursId } = req.params;
     
@@ -138,8 +138,6 @@ exports.supprimerDevoir = async (req, res) => {
 };
 
   
-
-
   exports.mettreAJourDevoir = async (req, res) => {
     try {
       const { date_fin,title,idDevoir } = req.body;
@@ -337,7 +335,7 @@ exports.GetAllDevoir = async (req, res) => {
 
     
     const devoirs = await Devoir.find({ cours: CoursId }).lean();
-
+    
    
     const devoirsAvecComptesRendus = await Promise.all(
       devoirs.map(async (devoir) => {

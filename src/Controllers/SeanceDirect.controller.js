@@ -124,7 +124,7 @@ exports.deleteSeance = async (req, res) => {
 exports.getSeancesForEnseignant = async (req, res) => {
   try {
     const { enseignantId } = req.userId;
-    
+    const {CoursId}=req.body;
     
     const enseignant = await Utilisateur.findById(enseignantId);
     if (!enseignant || enseignant.role !== 'enseignant') {
@@ -135,7 +135,7 @@ exports.getSeancesForEnseignant = async (req, res) => {
     }
 
     
-    const courses = await Cours.find({ enseignant: enseignantId });
+    const courses = await Cours.find({ enseignant: enseignantId, _id:CoursId });
     const courseIds = courses.map(course => course._id);
 
     
@@ -213,7 +213,6 @@ exports.getTodaySeancesForEnseignant = async (req, res) => {
 exports.getSeancesForEtudiant = async (req, res) => {
   try {
     const { etudiantId } = req.userId;
-    
     
     const etudiant = await Utilisateur.findById(etudiantId);
     if (!etudiant || etudiant.role !== 'étudiant') {
