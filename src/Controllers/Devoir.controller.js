@@ -209,7 +209,7 @@ exports.supprimerDevoir = async (req, res) => {
 exports.soumettreCompteRendu = async (req, res) => {
     try {
       const { devoirId } = req.params;
-      const etudiantId =  req.userId; 
+      const etudiantId = req.userId; 
        
     const utilisateur = await Utilisateur.findById(etudiantId);
     if (!utilisateur || utilisateur.role !== 'étudiant') {

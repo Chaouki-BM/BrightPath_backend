@@ -153,9 +153,8 @@ exports.getCoursParEnseignant = async (req, res) => {
   //---> Get abonment cours 
  exports.getStudentSubscriptions = async (req, res) => {
     try {
-        const etudiantId =  req.userId;
+        const etudiantId = req.userId;
         
-      
         if (!etudiantId) {
             return res.status(400).json({
                 success: false,
@@ -163,11 +162,9 @@ exports.getCoursParEnseignant = async (req, res) => {
             });
         }
         
-       
         const oneMonthAgo = new Date();
         oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
         
-       
         const updateResult = await Abonnement.updateMany(
             {
                 etudiant: etudiantId,
@@ -179,7 +176,6 @@ exports.getCoursParEnseignant = async (req, res) => {
             }
         );
         
-       
         const abonnements = await Abonnement.find({
             etudiant: etudiantId,
             etat: "paye"
@@ -196,7 +192,6 @@ exports.getCoursParEnseignant = async (req, res) => {
         .sort({ createdAt: -1 })
         .lean(); 
         
-       
         return res.status(200).json({
             success: true,
             message: abonnements.length > 0 

@@ -69,9 +69,10 @@ exports.createMeeting = async (req, res) => {
 
 exports.createSeance = async (req, res) => {
   try {
-    const { date, heure, cours } = req.body;
+    const { titre, date, heure, cours } = req.body;
     
     const newSeance = new SeanceDirect({
+      titre,
       date,
       heure,
       cours
@@ -126,6 +127,7 @@ exports.getSeancesForEnseignant = async (req, res) => {
     const { enseignantId } = req.userId;
     const {CoursId}=req.body;
     
+    console.log(enseignantId)
     const enseignant = await Utilisateur.findById(enseignantId);
     if (!enseignant || enseignant.role !== 'enseignant') {
       return res.status(403).json({
@@ -169,7 +171,7 @@ exports.getSeancesForEnseignant = async (req, res) => {
 
 exports.getTodaySeancesForEnseignant = async (req, res) => {
   try {
-    const { enseignantId } = req.userId;
+    const enseignantId = req.userId;
     
     const enseignant = await Utilisateur.findById(enseignantId);
     if (!enseignant || enseignant.role !== 'enseignant') {
@@ -212,8 +214,8 @@ exports.getTodaySeancesForEnseignant = async (req, res) => {
 
 exports.getSeancesForEtudiant = async (req, res) => {
   try {
-    const { etudiantId } = req.userId;
-    
+
+    const etudiantId = req.userId;
     const etudiant = await Utilisateur.findById(etudiantId);
     if (!etudiant || etudiant.role !== 'étudiant') {
       return res.status(403).json({
