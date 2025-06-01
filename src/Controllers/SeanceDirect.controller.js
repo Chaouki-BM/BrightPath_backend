@@ -124,8 +124,8 @@ exports.deleteSeance = async (req, res) => {
 
 exports.getSeancesForEnseignant = async (req, res) => {
   try {
-    const { enseignantId } = req.userId;
-    const {CoursId}=req.body;
+    const  enseignantId = req.userId;
+    const {CoursId}=req.params;
     
     console.log(enseignantId)
     const enseignant = await Utilisateur.findById(enseignantId);
