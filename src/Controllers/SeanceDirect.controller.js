@@ -281,8 +281,8 @@ exports.getSeancesForEtudiant = async (req, res) => {
 
 exports.getlinkSeanceDirectForEtudiant=async (req,res)=>{
   try{
-       const etudiantId=req.req.userId;
-       const {CoursID}=req.body;
+       const etudiantId=req.userId;
+       const {CoursID}=req.params;
        const etudiant = await Utilisateur.findById(etudiantId);
     if (!etudiant || etudiant.role !== 'étudiant') {
       return res.status(403).json({
@@ -297,11 +297,8 @@ exports.getlinkSeanceDirectForEtudiant=async (req,res)=>{
         message: 'Cours not found'
       });
     }
-    const now = new Date();
-
     const lastSeance = await SeanceDirect.findOne({ 
       cours: CoursID ,
-      date: { $gte: now },
       link: { $ne: null }
     }).sort({ updatedAt: -1 });
 
