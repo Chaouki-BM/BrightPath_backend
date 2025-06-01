@@ -36,7 +36,7 @@ exports.createMeeting = async (req, res) => {
   try {
     const accessToken = await generateAccessToken(); // Await the token
 
-    const { topic, duration } = req.body;
+    const { topic, duration,SeanceDirectID } = req.body;
 
     const response = await axios.post(
       'https://api.zoom.us/v2/users/me/meetings',
@@ -60,7 +60,11 @@ exports.createMeeting = async (req, res) => {
       joinUrl: response.data.join_url,
       password: response.data.password,
     });
-
+    if(response){
+      const SeanceD=await SeanceDirect.findById(SeanceDirectID);
+      SeanceD.link=response.data.join_url;
+      await SeanceD.save()
+    }
   } catch (error) {
     console.error('Error creating meeting:', error.response?.data || error.message);
     res.status(500).json({ error: 'Meeting creation failed' });
@@ -127,7 +131,6 @@ exports.getSeancesForEnseignant = async (req, res) => {
     const  enseignantId = req.userId;
     const {CoursId}=req.params;
     
-    console.log(enseignantId)
     const enseignant = await Utilisateur.findById(enseignantId);
     if (!enseignant || enseignant.role !== 'enseignant') {
       return res.status(403).json({
@@ -275,3 +278,50 @@ exports.getSeancesForEtudiant = async (req, res) => {
     });
   }
 };
+
+exports.getlinkSeanceDirectForEtudiant=async (req,res)=>{
+  try{
+       const etudiantId=req.req.userId;
+       const {CoursID}=req.body;
+       const etudiant = await Utilisateur.findById(etudiantId);
+    if (!etudiant || etudiant.role !== 'étudiant') {
+      return res.status(403).json({
+        success: false,
+        message: 'User is not an étudiant'
+      });
+    }
+    const cours=await Cours.findById(CoursID);
+    if (!cours) {
+      return res.status(404).json({
+        success: false,
+        message: 'Cours not found'
+      });
+    }
+    const now = new Date();
+
+    const lastSeance = await SeanceDirect.findOne({ 
+      cours: CoursID ,
+      date: { $gte: now },
+      link: { $ne: null }
+    }).sort({ updatedAt: -1 });
+
+    if (!lastSeance) {
+      return res.status(404).json({
+        success: false,
+        message: 'Aucune séance trouvée pour ce cours, attendez votre professeur'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      link: lastSeance.link,
+    });
+
+  }catch(error){
+    res.status(500).json({
+          success: false,
+          message: 'Error fetching seances for étudiant',
+          error: error.message
+        });
+  }
+}

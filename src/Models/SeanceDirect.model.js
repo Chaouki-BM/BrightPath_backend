@@ -4,6 +4,8 @@ const seanceDirectSchema = new mongoose.Schema({
   titre: String,
   date: String,
   heure: String,
+  link:{ type: Date, default: null },
+  
   cours: { type: mongoose.Schema.Types.ObjectId, ref: 'Cours' }
 },{
     timestamps:true

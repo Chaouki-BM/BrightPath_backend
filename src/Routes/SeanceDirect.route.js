@@ -8,5 +8,5 @@ Router.delete("/:id",SeanceDirect.deleteSeance);
 Router.get("/getSeancesForEnseignant/:CoursId",VerifyToken,SeanceDirect.getSeancesForEnseignant);
 Router.get("/getTodaySeancesForEnseignant",VerifyToken,SeanceDirect.getTodaySeancesForEnseignant);
 Router.get("/getSeancesForEtudiant",VerifyToken,SeanceDirect.getSeancesForEtudiant);
-
+Router.post("/getlinkSeanceDirectForEtudiant",VerifyToken,SeanceDirect.getlinkSeanceDirectForEtudiant);
 module.exports=Router;
