@@ -5,7 +5,7 @@ const EtudiantController=require("../Controllers/Etudiant.controller")
 const VerifyToken=require('../Middleware/VerifToken')
 const upload = require('../Middleware/multer');
 Router.post("/ERegister",EtudiantController.register);
-Router.get("/verification",EtudiantController.Verif_Mail);
+Router.put("/verification",EtudiantController.Verif_Mail);
 Router.post("/ELogin",EtudiantController.LoginEtudiant);
 Router.post("/EForgetMail",EtudiantController.SendEmailFrogetPassword);
 Router.post("/EUpdatePassword",EtudiantController.UpdateForgetPassword);
